@@ -37,8 +37,6 @@ Additionally, set up the virtual environment and activate it, using conda:
 
 conda env create -f environment.yml
 
-Optionally, there is 'requirementx.txt' if pip is preferred.
-
 Then, open the script main.py. It runs a cross-validation for the specified model configurations. The model can be 
 configured in the top part of the script. Further explanations are given in the script as comments, and a detailed 
 explanation of the methodology can be found in the paper publication.
@@ -60,5 +58,3 @@ time series. Modify this script to get the visualizations or evaluations needed.
 To create new datasets, based on other grid resolutions, specify the grid resolution and hyperparameters in main.py. 
 Then, the program will automatically compute a new dataset based on the downsampled and curated coronal hole 
 segmentation maps and save the dataset in the data folder.
-
-Copyright (c) Daniel Collin (2024).
