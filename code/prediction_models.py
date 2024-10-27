@@ -5,6 +5,7 @@ from sklearn import linear_model
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 from copy import copy, deepcopy
 from scipy import stats, special
+import pickle
 
 
 
@@ -513,7 +514,7 @@ def compute_baseline_predictions(X, Y, grid,options, output_scaler=None):
     return pred_27, pred_base
 
 
-def apply_distribution_transformation(pred, obs, min_train=None, options=None):
+def apply_distribution_transformation(pred, obs, min_train=None, options=None, calibration_idx=None):
     """
     Apply distribution transformation to predictions.
 
@@ -540,13 +541,18 @@ def apply_distribution_transformation(pred, obs, min_train=None, options=None):
         # Apply distribution transformation
         predictions_transformed = []
         dist_trans = DistributionTransformation()
-        dist_trans.fit(pred.loc['no_cme', 'train'], obs.loc['no_cme', 'train'])
+        # If a calibration index is given, use this for fitting instead of the full training data.
+        if calibration_idx is not None:
+            dist_trans.fit(pred.loc['no_cme', 'train'].loc[calibration_idx], obs.loc['no_cme', 'train'].loc[calibration_idx])
+        else:
+            dist_trans.fit(pred.loc['no_cme', 'train'], obs.loc['no_cme', 'train'])
+
 
         for idx in pred.index:
             for col in pred.columns:
                 # Transform predictions
                 pred_trans = dist_trans.transform(pred.loc[idx, col])
-                pred_trans = pd.Series(pred_trans,pred.loc[idx, col].index)
+                pred_trans = pd.Series(pred_trans,index=pred.loc[idx, col].index)
 
                 # Apply minimum threshold if specified
                 if min_train is not None:

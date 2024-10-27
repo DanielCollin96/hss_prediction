@@ -61,14 +61,14 @@ To create new datasets, based on other grid resolutions, specify the grid resolu
 Then, the program will automatically compute a new dataset based on the downsampled and curated coronal hole
 segmentation maps and save the dataset in the data folder.
 
-Change cme_list and enhancement_list as well as description in data upload, add alpha series.
-
 copyright (c) Daniel Collin.
 
 '''
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
+
 import preprocessing_dataset
 import cross_validation
 import os
@@ -82,14 +82,15 @@ np.random.seed(0)
 
 # Set grid size for model. That determines the data set and the hyperparameters which are loaded.
 # Available grid sizes are: 1x1, 2x1, 1x3, 4x3, 6x3, 10x3, 6x6, 10x6, 10x10, 14x6, 14x10.
-grid = '4x3'
+grid = '10x10'
 
-# Set evaluation mode. Set 'cv' for 5-fold cross-validation or '2018' for evaluation on the year 2018.
+# Set evaluation mode. Set 'cv' for 5-fold cross-validation, '2018' for evaluation on the year 2018, or 'sc25' for an
+# evaluation on solar cycle 2025, i.e., from 2020 onwards.
 eval_mode = 'cv'
 
 # Set target metric. Set 'rmse' to load the hyperparameters optimizing the RMSE of the model or 'peak_rmse' to load the
 # ones optimizing the RMSE at the peaks of HSSs.
-target_metric = 'rmse'
+target_metric = 'peak_rmse'
 
 # Set prediction model algorithm.
 # prediction_model options: polynomial, linear, ch_area_baseline, sw_persistence_baseline, average_baseline
@@ -110,6 +111,7 @@ if type(lasso_regularization_parameters) == str and lasso_regularization_paramet
     try:
         hyperparameters = pd.read_excel(path + '/data/hyperparameters.ods', sheet_name=target_metric, index_col=0)
         hyperparameters = hyperparameters.loc[grid, :].to_numpy()
+
     except:
         raise ValueError('Hyperparameters for the given grid size are not optimized. Please specify them directly.')
 else:
@@ -125,9 +127,26 @@ X, Y = preprocessing_dataset.read_ml_dataset(path, grid)
 
 # Compute train-test split.
 if eval_mode == 'cv':
+    cv_range = Y.index < datetime(2020,1,1)
+    Y = Y.iloc[cv_range]
+    X = X.iloc[cv_range,:]
     data_split = cross_validation.cross_validation_split(Y)
 elif eval_mode == '2018':
-    data_split = cross_validation.train_test_split_2018(Y)
+    cv_range = Y.index < datetime(2020, 1, 1)
+    Y = Y.iloc[cv_range]
+    X = X.iloc[cv_range, :]
+    data_split = cross_validation.train_test_split_single_interval(Y,test_interval=eval_mode,discard_buffer_data=True)
+elif eval_mode == 'sc25':
+    train_bin = Y.index <= datetime(2015, 12, 31, 23)
+    calibration_bin = (Y.index >= datetime(2020,1,1)) & (Y.index <= datetime(2020,12,31,23))
+    train_bin = train_bin | calibration_bin
+
+    test_bin = (Y.index >= datetime(2021,1,1)) & (Y.index <= datetime(2023,12,31,23))
+
+    train_idx = Y.index[train_bin]
+    test_idx = Y.index[test_bin]
+    calibration_idx = Y.index[calibration_bin]
+    data_split = [[train_idx],[test_idx],calibration_idx]
 
 # Delete CMEs from train-test split and save both versions without and with CMEs.
 data_split_without_cmes = cross_validation.delete_cmes_from_data_split(data_split, cme_list)

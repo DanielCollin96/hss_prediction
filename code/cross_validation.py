@@ -76,7 +76,7 @@ def cross_validation_split(Y, n_splits=5):
 
     return cv_train, cv_test
 
-def train_test_split_2018(Y):
+def train_test_split_single_interval(Y, test_interval='2018', discard_buffer_data=True):
     """
     Splits the data into a test set, being the year 2018, and the rest of the data as a training set.
 
@@ -92,17 +92,37 @@ def train_test_split_2018(Y):
     cv_test : list
         The list contains one list of dates of the test set.
     """
-    dates = Y.index
-    dates_test = Y[datetime(2018, 1, 1, 0):datetime(2018, 12, 31, 23)].index
-    dates_train = np.concatenate([Y[:datetime(2017, 12, 31, 23) - timedelta(days=180)].index,
-                                  Y[datetime(2019, 1, 1, 0) + timedelta(days=180):].index])
-    binary_test = np.concatenate([np.zeros(len(Y[:datetime(2017, 12, 31, 23)]), dtype=bool),
-                                  np.ones(len(dates_test), dtype=bool),
-                                  np.zeros(len(Y[datetime(2019, 1, 1, 0):]), dtype=bool)])
-    binary_train = np.concatenate([np.ones(len(Y[:datetime(2017, 12, 31, 23) - timedelta(days=180)]), dtype=bool),
-                                   np.zeros(len(dates_test) + 360 * 24, dtype=bool),
-                                   np.ones(len(Y[datetime(2019, 1, 1, 0) + timedelta(days=180):]), dtype=bool)])
-    data_split = [[dates[binary_train]], [dates[binary_test]]]
+    if test_interval == '2018':
+        test_interval_dates = [datetime(2018, 1, 1, 0), datetime(2018, 12, 31, 23)]
+        train_interval_dates_1 = [datetime(2010, 6, 1, 0), datetime(2017, 12, 31, 23)]
+        train_interval_dates_2 = [datetime(2019, 1, 1, 0), datetime(2019, 12, 31, 23)]
+        if discard_buffer_data:
+            train_interval_dates_1[1] = train_interval_dates_1[1] - timedelta(days=180)
+            train_interval_dates_2[0] = train_interval_dates_2[0] + timedelta(days=180)
+    elif test_interval == 'sc25':
+        test_interval_dates = [datetime(2020, 1, 1, 0), datetime(2024, 6, 30, 23)]
+        train_interval_dates_1 = [datetime(2010, 6, 1, 0), datetime(2019, 12, 31, 23)]
+        train_interval_dates_2 = None
+        if discard_buffer_data:
+            train_interval_dates_1[1] = train_interval_dates_1[1] - timedelta(days=180)
+    else:
+        raise ValueError('Invalid test interval option. Test interval options are 2018 and sc25.')
+
+    #dates = Y.index
+    dates_test = Y[test_interval_dates[0]:test_interval_dates[1]].index
+    dates_train = Y[train_interval_dates_1[0]:train_interval_dates_1[1]].index
+    if train_interval_dates_2 is not None:
+        dates_train = np.concatenate([dates_train,Y[train_interval_dates_2[0]:train_interval_dates_2[1]].index])
+
+    data_split = [[dates_train], [dates_test]]
+
+    #binary_test = np.concatenate([np.zeros(len(Y[:datetime(2017, 12, 31, 23)]), dtype=bool),
+    #                              np.ones(len(dates_test), dtype=bool),
+    #                              np.zeros(len(Y[datetime(2019, 1, 1, 0):]), dtype=bool)])
+    #binary_train = np.concatenate([np.ones(len(Y[:datetime(2017, 12, 31, 23) - timedelta(days=180)]), dtype=bool),
+    #                               np.zeros(len(dates_test) + 360 * 24, dtype=bool),
+    #                               np.ones(len(Y[datetime(2019, 1, 1, 0) + timedelta(days=180):]), dtype=bool)])
+    #data_split = [[dates[binary_train]], [dates[binary_test]]]
     return data_split
 
 
@@ -453,8 +473,11 @@ def cross_validation(hyperparameters, X, Y, data_split, cme_list, enhancement_li
                                                          scaler_output, options=options)
 
         # Apply distribution transformation
-        pred_trans = prediction_models.apply_distribution_transformation(pred, Y_fold, np.min(Y_fold.loc['with_cme', 'train']), options)
-
+        if len(data_split) == 3:
+            calibration_idx = data_split[2]
+        else:
+            calibration_idx = None
+        pred_trans = prediction_models.apply_distribution_transformation(pred, Y_fold, np.min(Y_fold.loc['with_cme', 'train']), options,calibration_idx)
 
         # Compute baseline predictions
         pred_27, pred_base = prediction_models.compute_baseline_predictions(X_fold, Y_fold_scaled, grid, options, scaler_output)
