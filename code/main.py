@@ -82,7 +82,7 @@ np.random.seed(0)
 
 # Set grid size for model. That determines the data set and the hyperparameters which are loaded.
 # Available grid sizes are: 1x1, 2x1, 1x3, 4x3, 6x3, 10x3, 6x6, 10x6, 10x10, 14x6, 14x10.
-grid = '10x10'
+grid = '4x3'
 
 # Set evaluation mode. Set 'cv' for 5-fold cross-validation, '2018' for evaluation on the year 2018, or 'sc25' for an
 # evaluation on solar cycle 2025, i.e., from 2020 onwards.
@@ -90,7 +90,7 @@ eval_mode = 'cv'
 
 # Set target metric. Set 'rmse' to load the hyperparameters optimizing the RMSE of the model or 'peak_rmse' to load the
 # ones optimizing the RMSE at the peaks of HSSs.
-target_metric = 'peak_rmse'
+target_metric = 'rmse'
 
 # Set prediction model algorithm.
 # prediction_model options: polynomial, linear, ch_area_baseline, sw_persistence_baseline, average_baseline
