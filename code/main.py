@@ -1,11 +1,12 @@
 '''
 This code is a supplement to the following publication:
 
-Collin, Daniel; Shprits, Yuri; Hofmeister, Stefan J.; Bianco, Stefano; Gallego, Guillermo (2024):
-High-Speed Solar Wind Stream Prediction from Solar Images Using a Distribution Transformation. (In review)
+Collin, D., Shprits, Y., Hofmeister, S. J., Bianco, S., & Gallego, G. (2025). Forecasting high-speed solar wind streams
+from solar images. Space Weather, 23, e2024SW004125. https://doi.org/10.1029/2024SW004125
 
 It can be used to reproduce the results presented in the paper, or to reuse or further develop the methodology for other
-purposes. In case of questions or bugs, please contact the author Daniel Collin at collin@gfz-potsdam.de.
+purposes. It is published under MIT license. Copyright (c) Daniel Collin (2024).
+In case of questions or bugs, please contact the author Daniel Collin at collin@gfz.de.
 
 The data, needed to reproduce the results, can be obtained from the following data publication:
 
@@ -18,7 +19,7 @@ using the following structure:
     - data
         - hyperparameters.ods
         - datasets
-            - alpha.pickle
+            - alpha.csv
             - ml_data
                 - 4x3.csv
                 - ... (machine learning datasets based on specific grid resolutions)
@@ -37,8 +38,6 @@ Additionally, set up the virtual environment and activate it, using conda:
 
 conda env create -f environment.yml
 
-Optionally, there is 'requirementx.txt' if pip is preferred.
-
 Then, open the script main.py. It runs a cross-validation for the specified model configurations. The model can be
 configured in the top part of the script. Further explanations are given in the script as comments, and a detailed
 explanation of the methodology can be found in the paper publication.
@@ -51,7 +50,10 @@ optimized towards the HSS peak velocity RMSE.
 Results are stored in an additional 'results' folder, containing the subfolders 'model_eval' and 'model_pred',
 the first one containing excel files summarizing the evaluation metrics, model coefficients and feature importance,
 and the second one containing pickle files storing computed data products, e.g., predictions and observations of the
-time series and HSSs.
+time series and HSSs. The main folder 'results' additionally contains csv files with the predicted time series that
+were presented in the paper (cv = cross-validation results, sc25 = operational predictions on solar cycle 25). Note
+that these time series also contain predictions for CME intervals. If these should be excluded, please use the provided
+CME list.
 
 An example of how to access and plot the predictions stored in model_pred is given in the script look_at_results.py.
 After running main.py and computing results, look_at_results.py can be executed and plots a section of the predicted
@@ -61,7 +63,6 @@ To create new datasets, based on other grid resolutions, specify the grid resolu
 Then, the program will automatically compute a new dataset based on the downsampled and curated coronal hole
 segmentation maps and save the dataset in the data folder.
 
-copyright (c) Daniel Collin.
 
 '''
 from datetime import datetime
