@@ -254,9 +254,9 @@ def create_ml_dataset(grid_resolution, start=datetime(2010, 6, 1, 0), end=dateti
     existing_dataset = False
     if len(files) > 0:
         existing_dataset = True
-        data = pickle.load(open(path + '/data/datasets/ml_data/{}'.format(files[0]), 'rb'))
-        existing_input = data[0]
-        existing_output = data[1]
+        data = pd.read_csv(path + '/data/datasets/ml_data/{}'.format(files[0]),index_col=0,parse_dates=[0])
+        existing_input = data.iloc[:,1:]
+        existing_output = data.iloc[:,0]
 
         # Extract features that do not depend on the grid resolution
         drop_features = []
@@ -267,13 +267,14 @@ def create_ml_dataset(grid_resolution, start=datetime(2010, 6, 1, 0), end=dateti
     else:
         # If features have not been computed yet, do that using OMNI and sunspot data
         print('Reading OMNIweb.')
-        sw = pickle.load(open(path + "/data/solar_wind/omni.pickle", 'rb'))
+        sw = pd.read_csv(path + "/data/solar_wind/omni.csv", index_col=0, parse_dates=[0])
 
         print('Reading sunspot data.')
-        sunspots = pickle.load(open(path + "/data/solar_wind/sunspots.pickle", 'rb'))
+        sunspots = pd.read_csv(path + "/data/solar_wind/sunspots.csv", index_col=0, parse_dates=[0]).squeeze()
 
     # load alpha parameter as it is needed to compute the coronal hole area features and to rotate the grid
-    alpha = pickle.load(open(path + "/data/datasets/alpha.pickle", 'rb'))
+    alpha = pd.read_csv(path + "/data/datasets/alpha.csv",index_col=0,parse_dates=[0]).squeeze()
+
 
     print('Reading coronal hole data.')
     try:
@@ -520,7 +521,7 @@ def create_cme_hss_list(sw, icme_list,add_all_icme=True):
 
 def read_cme_hss_list(path):
     """
-    Reads CME, HSS, and enhancement lists from pickle files or generates them if not available.
+    Reads CME, HSS, and enhancement lists from csv files or generates them if not available.
 
     Parameters
     ----------
@@ -537,25 +538,27 @@ def read_cme_hss_list(path):
     """
 
     try:
-        cme_list = pickle.load(open(path + '/data/datasets/enhancements/cme_list.pickle', 'rb'))
-        hss_list = pickle.load(open(path + '/data/datasets/enhancements/hss_list.pickle', 'rb'))
-        enhancement_list = pickle.load(open(path + '/data/datasets/enhancements/enhancement_list.pickle', 'rb'))
+        cme_list = pd.read_csv(path + '/data/datasets/enhancements/cme_list.csv', index_col=0, parse_dates=[1, 3, 4, 5])
+        hss_list = pd.read_csv(path + '/data/datasets/enhancements/hss_list.csv', index_col=0, parse_dates=[1, 3, 4, 5])
+        enhancement_list = pd.read_csv(path + '/data/datasets/enhancements/enhancement_list.csv', index_col=0,
+                                       parse_dates=[1, 3, 4, 5])
+
     except FileNotFoundError:
         # read SW in-situ measurements from OMNI and restrict to SW speed
-        omni = pickle.load(open(path + '/data/solar_wind/omni.pickle', 'rb'))
+        omni = pd.read_csv(path + '/data/solar_wind/omni.csv',index_col=0, parse_dates=[0])
         sw_speed = omni.loc[:, 'speed']
 
         # read the Richardson and Cane ICME list restrict to plasma field start and end times
-        rc_list = pickle.load(open(path + '/data/solar_wind/icme.pickle', 'rb'))
+        rc_list = pd.read_csv(path + '/data/solar_wind/icme.csv',index_col=0,parse_dates=[1,2])
         rc_list_start_end = rc_list.loc[:, ['ICME Plasma/Field Start Y/M/D (UT)', 'ICME Plasma/Field End Y/M/D (UT)']]
         rc_list = pd.DataFrame(rc_list_start_end.values, columns=['start', 'end'])
 
         # create a list of solar storms from the SW speed time series, and classify as CMEs and HSSs
         cme_list, hss_list, enhancement_list = create_cme_hss_list(sw_speed, rc_list,add_all_icme=True)
 
-        pickle.dump(cme_list, open(path + '/data/datasets/enhancements/cme_list.pickle', 'wb'))
-        pickle.dump(hss_list, open(path + '/data/datasets/enhancements/hss_list.pickle', 'wb'))
-        pickle.dump(enhancement_list, open(path + '/data/datasets/enhancements/enhancement_list.pickle', 'wb'))
+        cme_list.to_csv(path + '/data/datasets/enhancements/cme_list.csv', index=True)
+        hss_list.to_csv(path + '/data/datasets/enhancements/hss_list.csv',index=True)
+        enhancement_list.to_csv(path + '/data/datasets/enhancements/enhancement_list.csv', index=True)
 
     return cme_list, hss_list, enhancement_list
 
@@ -563,7 +566,7 @@ def read_cme_hss_list(path):
 
 def read_ml_dataset(path, grid):
     """
-    Reads machine learning dataset from pickle file or generates it if not available.
+    Reads machine learning dataset from csv file or generates it if not available.
 
     Parameters
     ----------
@@ -579,11 +582,13 @@ def read_ml_dataset(path, grid):
     """
 
     try:
-        data = pickle.load(open(path + '/data/datasets/ml_data/{}.pickle'.format(grid), 'rb'))
-        X, Y = data
+        data = pd.read_csv(path + '/data/datasets/ml_data/{}.csv'.format(grid),index_col=0,parse_dates=[0])
+        Y = data.iloc[:,0]
+        X = data.iloc[:,1:]
     except FileNotFoundError:
         X, Y = create_ml_dataset(grid)
-        pickle.dump((X, Y), open(path + '/data/datasets/ml_data/{}.pickle'.format(grid), 'wb'))
+        data = pd.concat([Y, X], axis=1)
+        data.to_csv(path + '/data/datasets/ml_data/{}.csv'.format(grid), index=True)
 
     return X, Y
 

@@ -20,13 +20,13 @@ using the following structure:
         - datasets
             - alpha.pickle
             - ml_data
-                - 4x3.pickle
+                - 4x3.csv
                 - ... (machine learning datasets based on specific grid resolutions)
-                - 10x10.pickle
+                - 10x10.csv
             - enhancements
-                - cme_list.pickle
-                - hss_list.pickle
-                - enhancement_list.pickle
+                - cme_list.csv
+                - hss_list.csv
+                - enhancement_list.csv
         - segmentation_maps
             - curated
                 - 2010-05.pickle

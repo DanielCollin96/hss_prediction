@@ -109,7 +109,7 @@ distribution_transformation = True
 
 dir_path = os.path.dirname(os.getcwd())
 
-cme_list = pickle.load(open(dir_path + '/data/datasets/enhancements/cme_list.pickle','rb'))
+cme_list = pd.read_csv(dir_path + '/data/datasets/enhancements/cme_list.csv',index_col=0,parse_dates=[1, 3, 4, 5])
 if not os.path.exists(dir_path + '/results/figures'):
     os.mkdir(dir_path + '/results/figures')
 
