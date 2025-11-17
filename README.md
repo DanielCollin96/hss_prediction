@@ -52,8 +52,8 @@ The dataset used in the paper was published in [Collin et al. (2024)](https://do
 
 The code for our approach is provided in python files in the [code folder](https://github.com/DanielCollin96/hss_prediction/tree/main/code), each of which contains detailed annotations. There are two main scripts to run, which cover the following functionalities:
 
-- Training and testing of the model using cross-validation: [run_model.py](https://github.com/DanielCollin96/hss_prediction/blob/main/code/run_model.py)
-- Plotting the predicted time series: [look_at_results.py](https://github.com/DanielCollin96/hss_prediction/blob/main/code/look_at_results.py)
+- Training and testing of the model using cross-validation: [`run_model.py`](https://github.com/DanielCollin96/hss_prediction/blob/main/code/run_model.py)
+- Plotting the predicted time series: [`look_at_results.py`](https://github.com/DanielCollin96/hss_prediction/blob/main/code/look_at_results.py)
 
 To use these notebooks, follow the installation guide below.
 
@@ -76,7 +76,7 @@ conda activate ch_sws_prediction
 
 Download the dataset [here](https://doi.org/10.5880/GFZ.2.7.2024.001).
 
-After downloading the data, create a folder data/ next to the code/ folder with the following structure:
+After downloading the data, create a folder `data/` next to the `code/` folder with the following structure:
 
 ```
 data
@@ -100,11 +100,11 @@ data
 
 #### 4. Configure script
 
-Open the script [run_model.py](https://github.com/DanielCollin96/hss_prediction/blob/main/code/run_model.py). It runs a cross-validation for the specified model configurations. The model can be configured in the top part of the script. Further explanations are given in the script as comments, and a detailed explanation of the methodology can be found in the paper publication.
+Open the script [`run_model.py`](https://github.com/DanielCollin96/hss_prediction/blob/main/code/run_model.py). It runs a cross-validation for the specified model configurations. The model can be configured in the top part of the script. Further explanations are given in the script as comments, and a detailed explanation of the methodology can be found in the paper publication.
 
-The script is currently configured to compute the cross-validation results for the 4x3 grid model, optimized towards minimizing the timeline RMSE. To compute the results for the second model that is mainly used in the paper, set grid = '10x10' and target_metric = 'peak_rmse'. This will compute the results for the 10x10 grid model, optimized towards the HSS peak velocity RMSE.
+The script is currently configured to compute the cross-validation results for the 4x3 grid model, optimized towards minimizing the timeline RMSE. To compute the results for the second model that is mainly used in the paper, set `grid = '10x10'` and `target_metric = 'peak_rmse'`. This will compute the results for the 10x10 grid model, optimized towards the HSS peak velocity RMSE.
 
-To create new datasets, based on other grid resolutions, specify the grid resolution and hyperparameters in run_model.py. Then, the program will automatically compute a new dataset based on the downsampled and curated coronal hole segmentation maps and save the dataset in the data folder.
+To create new datasets, based on other grid resolutions, specify the grid resolution and hyperparameters in `run_model.py`. Then, the program will automatically compute a new dataset based on the downsampled and curated coronal hole segmentation maps and save the dataset in the data folder.
 
 #### 5. Run script
 
@@ -116,9 +116,9 @@ python run_model.py
 
 #### 6. Access results
 
-Results are stored in the results/ folder, containing the subfolders model_eval/ and model_pred/. The first one contains excel files summarizing the evaluation metrics, model coefficients and feature importance, and the second one contains pickle files storing the computed output, e.g., predictions and observations of the time series and high-speed streams. Additionally, the main results/ folder contains csv files with the predicted time series that were presented in the paper (cv = cross-validation results, sc25 = operational predictions on solar cycle 25). Note that these time series also contain predictions for CME intervals. If these should be excluded, please use the provided CME list.
+Results are stored in the `results/` folder, containing the subfolders `model_eval/` and `model_pred/`. The first one contains excel files summarizing the evaluation metrics, model coefficients and feature importance, and the second one contains pickle files storing the computed output, e.g., predictions and observations of the time series and high-speed streams. Additionally, the main `results/` folder contains csv files with the predicted time series that were presented in the paper (cv = cross-validation results, sc25 = operational predictions on solar cycle 25). Note that these time series also contain predictions for CME intervals. If these should be excluded, please use the provided CME list.
 
-An example of how to access and plot the predictions stored in model_pred/ is given in the script [look_at_results.py](https://github.com/DanielCollin96/hss_prediction/blob/main/code/look_at_results.py). The script can be modified to get the visualizations or evaluations needed. Run it using the following command:
+An example of how to access and plot the predictions stored in `model_pred/` is given in the script [`look_at_results.py`](https://github.com/DanielCollin96/hss_prediction/blob/main/code/look_at_results.py). The script can be modified to get the visualizations or evaluations needed. Run it using the following command:
 
 ```
 python look_at_results.py
