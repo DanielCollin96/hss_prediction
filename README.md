@@ -4,7 +4,7 @@ Official repository for [Forecasting High-Speed Solar Wind Streams from Solar Im
 
 <h2 align="left">
 
-[Journal Publication](https://doi.org/10.1029/2024SW004125) | [Data Publication](https://doi.org/10.5880/GFZ.2.7.2024.001) 
+[Journal Publication](https://doi.org/10.1029/2024SW004125) | [Data Publication](https://doi.org/10.5880/GFZ.2.7.2024.001) | [Predictions for Comparison](https://github.com/DanielCollin96/hss_prediction/tree/main/results)
 </h2>
 
 
