@@ -46,7 +46,7 @@ If you use this work in your research, please cite it as follows:
 
 ## Dataset
 
-The dataset used in the paper was published in [Collin et al. (2024)](https://doi.org/10.5880/GFZ.2.7.2024.001). Click on the link to download the dataset and reproduce the results.
+The dataset used in the paper was published in [Collin et al. (2024)](https://doi.org/10.5880/GFZ.2.7.2024.001). Click on the link to download the dataset and reproduce the results or to obtain our predictions for comparison with your own results.
 
 ## Installation & Usage
 
